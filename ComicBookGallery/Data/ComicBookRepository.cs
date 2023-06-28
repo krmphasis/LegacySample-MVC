@@ -13,18 +13,6 @@ namespace ComicBookGallery.Data
             return _comicBooks;
         }
 
-        public ComicBook GetComicBook(int id)
-        {
-            foreach (ComicBook comicBook in _comicBooks)
-            {
-                if (comicBook.Id == id)
-                {
-                    return comicBook;
-                }
-            }
-            return null;
-        }
-
         private static ComicBook[] _comicBooks = new ComicBook[]
         {
             new ComicBook()
@@ -75,5 +63,42 @@ namespace ComicBookGallery.Data
                 Favorite = false
             }
         };
+        
+        public ActionResult GetComicBooks(int id)
+        {
+            var connectionString = "your_connection_string_here";
+            var comicBooks = new List<ComicBook>();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqlCommand("GetComicBooks", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Add parameters to the stored procedure
+                    command.Parameters.AddWithValue("@Id", id);
+
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var comicBook = new ComicBook();
+                            comicBook.Id = (int)reader["Id"];
+                            comicBook.SeriesTitle = (string)reader["SeriesTitle"];
+                            comicBook.IssueNumber = (int)reader["IssueNumber"];
+                            comicBook.DescriptionHtml = (string)reader["DescriptionHtml"];
+                            comicBook.Favorite = (bool)reader["Favorite"];
+
+                            comicBooks.Add(comicBook);
+                        }
+                    }
+                }
+            }
+
+            return View(comicBooks);
+        }
     }
 }
