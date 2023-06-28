@@ -53,5 +53,27 @@ namespace ComicBookGallery.Controllers
             //};
             return Content("This is a test.");
         }
+
+        public ActionResult CreateDocument()
+        {
+            // Create a new workbook
+            using (var excelEngine = new ExcelEngine())
+            {
+                var workbook = excelEngine.Excel.Workbooks.Add(1);
+
+                // Add a worksheet
+                var worksheet = workbook.Worksheets[0];
+
+                // Add some data
+                worksheet.Range["A1"].Text = "Hello";
+                worksheet.Range["B1"].Text = "World!";
+
+                // Save the workbook to a file
+                workbook.SaveAs("newdocument.xlsx", ExcelSaveType.SaveAsXLS, HttpContext.ApplicationInstance.Response, ExcelDownloadType.PromptDialog);
+            }
+
+            return Content("Excel document created and saved as workbook!");
+        }
+
     }
 }
